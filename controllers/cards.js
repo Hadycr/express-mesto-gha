@@ -24,8 +24,11 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
+      if (err.name === 'ValidationError') {
         return res.status(404).send({ message: 'Данные не найдены' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Данные не корректны' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
     });
@@ -38,7 +41,15 @@ module.exports.addLike = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(404).send({ message: 'Данные не найдены' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Данные не корректны' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.deleteLike = (req, res) => {
@@ -48,5 +59,13 @@ module.exports.deleteLike = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(404).send({ message: 'Данные не найдены' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Данные не корректны' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };

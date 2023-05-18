@@ -42,6 +42,9 @@ module.exports.updateUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
+        return res.status(404).send({ message: 'Данные не найдены' });
+      }
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Данные не корректны' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
