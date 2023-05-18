@@ -9,13 +9,16 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    // eslint-disable-next-line consistent-return
+    .orFail()
     .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: 'Произошла ошибка' });
-      }
+      res.send(user);
     })
-    .catch((err) => res.status(500).send(err));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Данные не корректны' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.createUser = (req, res) => {
