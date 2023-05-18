@@ -23,7 +23,12 @@ module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
     .then((card) => res.send({ card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({ message: 'Данные не найдены' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.addLike = (req, res) => {

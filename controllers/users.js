@@ -14,8 +14,8 @@ module.exports.getUserById = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Данные не корректны' });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({ message: 'Данные не найдены' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
     });
