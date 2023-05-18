@@ -14,7 +14,7 @@ module.exports.getUserById = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Данные не корректны' });
       }
       if (err.name === 'DocumentNotFoundError') {
@@ -41,7 +41,7 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { name, about })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Данные не корректны' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
