@@ -7,7 +7,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.params.userId;
   User.findById(userId)
     // eslint-disable-next-line consistent-return
     .then((user) => {
