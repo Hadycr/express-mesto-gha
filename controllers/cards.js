@@ -22,9 +22,10 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
+    .orFail()
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(404).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
@@ -40,9 +41,10 @@ module.exports.addLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(404).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
@@ -58,9 +60,10 @@ module.exports.deleteLike = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(404).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
