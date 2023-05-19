@@ -44,9 +44,6 @@ module.exports.updateUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Данные не корректны' });
       }
-      // if (err.name === 'CastError') {
-      //   return res.status(400).send({ message: 'Данные не корректны' });
-      // }
       return res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
