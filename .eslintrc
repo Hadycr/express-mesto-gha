@@ -5,7 +5,6 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:vue/vue3-essential",
         "airbnb-base"
     ],
     "overrides": [
@@ -14,9 +13,6 @@
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "plugins": [
-        "vue"
-    ],
     "rules": {
       "no-underscore-dangle": [
         "error",

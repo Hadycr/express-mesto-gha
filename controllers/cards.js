@@ -1,9 +1,14 @@
 const Card = require('../models/card');
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT_ERROR,
+} = require('../errors/errors');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -13,9 +18,9 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Данные не корректны' });
+        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -26,12 +31,12 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Данные не найдены' });
+        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Данные не корректны' });
+        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -45,12 +50,12 @@ module.exports.addLike = (req, res) => {
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Данные не найдены' });
+        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Данные не корректны' });
+        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -64,11 +69,11 @@ module.exports.deleteLike = (req, res) => {
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Данные не найдены' });
+        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Данные не корректны' });
+        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
