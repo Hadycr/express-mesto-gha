@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   BAD_REQUEST,
@@ -30,10 +32,23 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then(() => res.send({
+      name,
+      about,
+      avatar,
+      email,
+    }))
     .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(409).send({ message: 'Такой пользователь уже существует' });
+      }
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
       }
@@ -63,4 +78,28 @@ module.exports.updateAvatar = (req, res) => {
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  console.log(req.body);
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token, message: 'Всё верно!' }); // хз может только token
+    })
+    .catch((err) => {
+      // ошибка аутентификации
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUsers = (req, res) => {
+  // const { userId } = req.params;
+  // console.log(req.params);
+  User.findById(req.user._id)
+    .then((user) => res.send(user))
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
 };
