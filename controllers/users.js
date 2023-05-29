@@ -1,37 +1,36 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT_ERROR,
-} = require('../errors/errors');
 
-module.exports.getUsers = (req, res) => {
+const BadRequestError = require('../errors/badRequestError');
+const ConflictError = require('../errors/conflictError');
+const NotFoundError = require('../errors/notFoundError');
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
     .then((user) => {
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -47,40 +46,46 @@ module.exports.createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(409).send({ message: 'Такой пользователь уже существует' });
+        next(new ConflictError('Такой пользователь уже существует'));
+      } else {
+        next(err);
       }
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   console.log(req.body);
   return User.findUserByCredentials(email, password)
@@ -88,18 +93,13 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token, message: 'Всё верно!' }); // хз может только token
     })
-    .catch((err) => {
-      // ошибка аутентификации
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
-module.exports.getCurrentUsers = (req, res) => {
+module.exports.getCurrentUsers = (req, res, next) => {
   // const { userId } = req.params;
   // console.log(req.params);
   User.findById(req.user._id)
     .then((user) => res.send(user))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };

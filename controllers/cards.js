@@ -1,79 +1,94 @@
 const Card = require('../models/card');
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT_ERROR,
-} = require('../errors/errors');
 
-module.exports.getCards = (req, res) => {
+const BadRequestError = require('../errors/badRequestError');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/notFoundError');
+
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    .catch(next);
+  // .catch((err) => next(err));
+  // .catch((err) => {
+  //   if (err.name === 'ValidationError') {
+  //     return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+  //   }
+  //   return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+  // });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
+    .then((card) => {
+      if (req.user._id !== card.owner._id.toString()) {
+        throw new ForbiddenError('Доступ запрещен');
+      } else {
+        return card.remove();
+      }
+    })
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
-      }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.addLike = (req, res) => {
+module.exports.addLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
-      }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
-module.exports.deleteLike = (req, res) => {
+module.exports.deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError('Данные не найдены');
+    })
+    .then((card) => {
+      if (req.user._id !== card.owner._id.toString()) {
+        throw new ForbiddenError('Доступ запрещен');
+      } else {
+        return card.remove();
+      }
+    })
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Данные не найдены' });
-      }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Данные не корректны' });
+        next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
