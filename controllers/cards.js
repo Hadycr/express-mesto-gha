@@ -27,12 +27,14 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  // const { cardId } = req.params;
+  console.log(req.user._id);
+  Card.findById(req.params)
     .orFail(() => {
       throw new NotFoundError('Данные не найдены');
     })
     .then((card) => {
+      console.log(card.owner._id);
       if (req.user._id !== card.owner._id.toString()) {
         throw new ForbiddenError('Доступ запрещен');
       } else {
