@@ -91,6 +91,7 @@ module.exports.login = (req, res, next) => {
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      console.log(token);
       res.send({ token, message: 'Всё верно!' }); // хз может только token
     })
     .catch(next);
