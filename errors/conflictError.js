@@ -1,4 +1,4 @@
-const { CONFLICT_ERROR_409 } = require('./errors');
+const { CONFLICT_ERROR_409 } = require('../config/config');
 
 class ConflictError extends Error {
   constructor(message) {

@@ -1,7 +1,3 @@
-// const BAD_REQUEST = 400;
-// const NOT_FOUND = 404;
-// const DEFAULT_ERROR = 500;
-
 const BAD_REQUEST_400 = 400;
 const NOT_FOUND_404 = 404;
 const DEFAULT_ERROR_500 = 500;

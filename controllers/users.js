@@ -5,7 +5,6 @@ const User = require('../models/user');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
 const NotFoundError = require('../errors/notFoundError');
-// const NotAuthorizationError = require('../errors/notAuthError');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -88,15 +87,9 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  console.log(req.body);
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      // console.log(user);
-      // if (!user) {
-      //   throw new NotAuthorizationError('Неправильная почта или пароль');
-      // }
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      console.log(token);
       res.send({ token, message: 'Всё верно!' }); // хз может только token
     })
     .catch(next);

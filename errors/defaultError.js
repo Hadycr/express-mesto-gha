@@ -1,4 +1,4 @@
-const { DEFAULT_ERROR_500 } = require('./errors');
+const { DEFAULT_ERROR_500 } = require('../config/config');
 
 const defaultError = (err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500

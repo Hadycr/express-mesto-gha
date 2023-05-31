@@ -1,4 +1,4 @@
-const { NOT_AUTHORIZED_ERROR_401 } = require('./errors');
+const { NOT_AUTHORIZED_ERROR_401 } = require('../config/config');
 
 class NotAuthorizationError extends Error {
   constructor(message) {
