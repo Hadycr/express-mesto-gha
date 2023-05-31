@@ -30,9 +30,7 @@ module.exports.deleteCard = (req, res, next) => {
   // const { cardId } = req.params;
   // console.log(req.params.cardId);
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => {
-      throw new NotFoundError('Данные не найдены');
-    })
+    .orFail(new NotFoundError('Данные не найдены'))
     .then((card) => {
       console.log(card.owner);
       if (req.user._id !== card.owner.toString()) {
