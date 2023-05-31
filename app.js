@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
 const defaultError = require('./errors/defaultError');
-const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -16,7 +15,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(bodyParser.json());
-app.use(auth);
+
 app.use(router);
 
 app.use(errors());
