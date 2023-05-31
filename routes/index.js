@@ -6,7 +6,6 @@ const { createUser, login } = require('../controllers/users');
 const userRouter = require('./users');
 const cardRouter = require('./cards');
 
-router.use(auth);
 router.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -22,7 +21,7 @@ router.post('/signin', celebrate({
     password: Joi.string().required(),
   }),
 }), login);
-
+router.use(auth);
 router.use('/users/', userRouter);
 router.use('/cards/', cardRouter);
 router.use('/*', (req, res) => {
