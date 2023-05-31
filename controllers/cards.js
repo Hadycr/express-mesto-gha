@@ -28,20 +28,22 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   // const { cardId } = req.params;
-  console.log(req.user._id);
-  Card.findById(req.params)
+  // console.log(req.params.cardId);
+  Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
       throw new NotFoundError('Данные не найдены');
     })
     .then((card) => {
-      console.log(card.owner._id);
-      if (req.user._id !== card.owner._id.toString()) {
+      console.log(card.owner);
+      if (req.user._id !== card.owner.toString()) {
         throw new ForbiddenError('Доступ запрещен');
-      } else {
-        return card.remove();
       }
+      // else {
+      //   return card.remove();
+      // }
+      res.send(card);
     })
-    .then((card) => res.send({ card }))
+    // .then(() => res.send({ message: 'удалено' }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Данные не корректны'));
