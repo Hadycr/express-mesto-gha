@@ -33,8 +33,8 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(new NotFoundError('Данные не найдены'))
     .then((card) => {
       console.log(card.owner);
-      if (req.user._id !== card.owner.toString()) {
-        throw new ForbiddenError('Доступ запрещен');
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Вы не можете удалить карточку другого пользователя');
       }
       // else {
       //   return card.remove();
@@ -45,9 +45,8 @@ module.exports.deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Данные не корректны'));
-      } else {
-        next(err);
       }
+      next(err);
     });
 };
 
@@ -82,8 +81,6 @@ module.exports.deleteLike = (req, res, next) => {
     .then((card) => {
       if (req.user._id !== card.owner._id.toString()) {
         throw new ForbiddenError('Доступ запрещен');
-      } else {
-        return card.remove();
       }
     })
     .then((card) => res.send({ card }))
