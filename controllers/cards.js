@@ -3,10 +3,11 @@ const Card = require('../models/card');
 const BadRequestError = require('../errors/badRequestError');
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
+const { STATUS_CREATED_201 } = require('../config/config');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send(cards))
+    .then((cards) => res.status(STATUS_CREATED_201).send(cards))
     .catch(next);
 };
 
@@ -30,8 +31,9 @@ module.exports.deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Данные не корректны'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -62,11 +64,6 @@ module.exports.deleteLike = (req, res, next) => {
   )
     .orFail(() => {
       throw new NotFoundError('Данные не найдены');
-    })
-    .then((card) => {
-      if (req.user._id !== card.owner._id.toString()) {
-        throw new ForbiddenError('Доступ запрещен');
-      }
     })
     .then((card) => res.send({ card }))
     .catch((err) => {

@@ -5,6 +5,7 @@ const User = require('../models/user');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
 const NotFoundError = require('../errors/notFoundError');
+const { STATUS_CREATED_201 } = require('../config/config');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -38,7 +39,7 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then(() => res.send({
+    .then(() => res.status(STATUS_CREATED_201).send({
       name,
       about,
       avatar,
@@ -90,14 +91,12 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      res.send({ token, message: 'Всё верно!' }); // хз может только token
+      res.send({ token, message: 'Всё верно!' });
     })
     .catch(next);
 };
 
 module.exports.getCurrentUsers = (req, res, next) => {
-  // const { userId } = req.params;
-  // console.log(req.params);
   User.findById(req.user._id)
     .then((user) => res.send(user))
     .catch(next);
