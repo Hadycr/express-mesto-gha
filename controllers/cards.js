@@ -7,7 +7,7 @@ const { STATUS_CREATED_201 } = require('../config/config');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(STATUS_CREATED_201).send(cards))
+    .then((cards) => res.send(cards))
     .catch(next);
 };
 
@@ -15,7 +15,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.send(card))
+    .then((card) => res.status(STATUS_CREATED_201).send(card))
     .catch(next);
 };
 
